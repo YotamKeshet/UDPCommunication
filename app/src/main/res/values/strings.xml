@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">UDPProject</string>
+    <string name="server">Server</string>
+    <string name="client">Client</string>
+    <string name="stop">Stop</string>
+    <string name="start">Start</string>
+    <string name="port">Port:</string>
+    <string name="packet_size_bytes">Packet Size [Bytes]:</string>
+    <string name="delay_ms">Delay [ms]:</string>
+    <string name="measurement">measurement:</string>
+    <string name="average_delay">Average Delay:</string>
+    <string name="max_delay">Max Delay:</string>
+    <string name="min_delay">Min Delay:</string>
+    <string name="loss_ratio">Loss Ratio:</string>
+</resources>
