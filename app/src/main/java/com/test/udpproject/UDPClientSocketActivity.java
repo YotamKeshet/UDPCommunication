@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
@@ -40,12 +43,13 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private TextView mElapsedTimeTextView;
 
     private int messageCounter = 0;
-    private int numberOfMessages = 0;
     private int numberOfLossPackets = 0;
+    private int packetsTransmitted = 0;
     private long maxDelay = Long.MIN_VALUE;
     private long minDelay = Long.MAX_VALUE;
     private long sumOfDelays = 0;
     private long mElapsedTime = 0;
+
 
 
     private Button mButtonStart;
@@ -61,6 +65,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
     private AnalyzeThread analyzeThread;
     private AnalyzeRunnable analyzeRunnable;
+    private DatagramSocket mDatagramSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +75,13 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
         initializeViews();
         setListeners();
+
+        try {
+            mDatagramSocket = new DatagramSocket();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
         analyzeRunnable = new AnalyzeRunnable();
         analyzeThread = new AnalyzeThread();
         analyzeThread.start();
@@ -198,8 +210,8 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
         Log.d(TAG, "message = " + Arrays.toString(message));
 
-
         messageNumber++;
+
         return message;
     }
 
@@ -230,29 +242,38 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private void sendMessage(){
         Log.d(TAG, "sendMessage");
         if(isStartFlag){
-            try (DatagramSocket ds = new DatagramSocket()) {
+            try{
                 // IP Address below is the IP address of that Device where server socket is opened.
                 InetAddress serverAddr = InetAddress.getByName(mServerIp);
                 DatagramPacket dp;
                 dp = new DatagramPacket(buildMessage(mPacketSize), mPacketSize, serverAddr, mServerPort);
-                ds.send(dp);
+                mDatagramSocket.send(dp);
+
+                packetsTransmitted++;
 
                 byte[] answerFromServer = new byte[mPacketSize];
                 dp = new DatagramPacket(answerFromServer, answerFromServer.length);
-                ds.receive(dp);
+                mDatagramSocket.receive(dp);
 
-                //TODO - VERIFY IF THIS WORKS FINE (check exception, and check if need to change data transmitted counter position).
-//                ds.setSoTimeout(3000);
+                mDatagramSocket.setSoTimeout(3000);
 
 
                 Log.d(TAG, "Message has been sent.");
                 analyzeRunnable.setData(answerFromServer);
                 analyzeThread.setRunnable(analyzeRunnable);
                 analyzeThread.run();
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+            catch(UnknownHostException e){
+                Log.e(TAG, "Fail to find host");
+            }
+            catch(SocketTimeoutException e){
+                numberOfLossPackets++;
+                Log.e(TAG, "Timeout exception");
+            }
+            catch(IOException e){
+                Log.e(TAG, "Fail to send or receive packet");
+            }
+
         }
     }
 
@@ -273,12 +294,12 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private void resetTestParameters(){
         messageNumber = 1;
         messageCounter = 0;
-        numberOfMessages = 0;
         numberOfLossPackets = 0;
         maxDelay = Long.MIN_VALUE;
         minDelay = Long.MAX_VALUE;
         sumOfDelays = 0;
         mElapsedTime = 0;
+        packetsTransmitted = 0;
     }
 
     private void clearViews(){
@@ -316,8 +337,6 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
             Log.d(TAG, "clientMessageCounter = " + clientMessageCounter + "  clientTimestamp = " + clientTimestamp);
 
-            numberOfMessages++;
-
             if(!(clientMessageCounter == messageCounter + 1)){
                 numberOfLossPackets++;
             }
@@ -337,8 +356,8 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
             }
 
             sumOfDelays += delay;
-            long averageDelay = sumOfDelays / numberOfMessages;
-            double lossRatio = (numberOfLossPackets / numberOfMessages) * 100;
+            long averageDelay = sumOfDelays / (packetsTransmitted - numberOfLossPackets);
+            double lossRatio = (numberOfLossPackets / messageNumber) * 100;
 
             StringBuilder averageDelayStringBuilder = new StringBuilder();
             averageDelayStringBuilder.append(getString(R.string.average_delay)).append(averageDelay).append("ms");
