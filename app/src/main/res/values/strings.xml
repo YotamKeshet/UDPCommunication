@@ -7,9 +7,12 @@
     <string name="port">Port:</string>
     <string name="packet_size_bytes">Packet Size [Bytes]:</string>
     <string name="delay_ms">Delay [ms]:</string>
-    <string name="measurement">measurement:</string>
+    <string name="measurement">Measurement:</string>
     <string name="average_delay">Average Delay:</string>
     <string name="max_delay">Max Delay:</string>
     <string name="min_delay">Min Delay:</string>
     <string name="loss_ratio">Loss Ratio:</string>
+    <string name="packets_transmitted">Packets Transmitted:</string>
+    <string name="packets_received">Packets Received:</string>
+    <string name="elapsed_time">Elapsed Time:</string>
 </resources>

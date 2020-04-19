@@ -1,7 +1,6 @@
 package com.test.udpproject;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,7 +31,22 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private EditText mPortEditText;
     private EditText mPacketSizeEditText;
     private EditText mDelayEditText;
-    private TextView mSendMessageTextView;
+    private TextView mAverageDelayTextView;
+    private TextView mMaxDelayTextView;
+    private TextView mMinDelayTextView;
+    private TextView mLossRatioTextView;
+    private TextView mPacketsTransmittedTextView;
+    private TextView mPacketsReceivedTextView;
+    private TextView mElapsedTimeTextView;
+
+    private int messageCounter = 0;
+    private int numberOfMessages = 0;
+    private int numberOfLossPackets = 0;
+    private long maxDelay = Long.MIN_VALUE;
+    private long minDelay = Long.MAX_VALUE;
+    private long sumOfDelays = 0;
+    private long mElapsedTime = 0;
+
 
     private Button mButtonStart;
     private Button mButtonStop;
@@ -45,6 +59,9 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private boolean isStartFlag = false;
     int messageNumber = 1;
 
+    private AnalyzeThread analyzeThread;
+    private AnalyzeRunnable analyzeRunnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
@@ -53,6 +70,9 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
         initializeViews();
         setListeners();
+        analyzeRunnable = new AnalyzeRunnable();
+        analyzeThread = new AnalyzeThread();
+        analyzeThread.start();
     }
 
     private void initializeViews(){
@@ -62,7 +82,13 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mIPEditText = findViewById(R.id.ipEditText);
         mPacketSizeEditText = findViewById(R.id.packetSizeEditText);
         mDelayEditText = findViewById(R.id.delayEditText);
-        mSendMessageTextView = findViewById(R.id.sentMessageTextView);
+        mAverageDelayTextView = findViewById(R.id.averageDelay);
+        mMaxDelayTextView = findViewById(R.id.maxDelay);
+        mMinDelayTextView = findViewById(R.id.minDelay);
+        mLossRatioTextView = findViewById(R.id.lossRatio);
+        mPacketsTransmittedTextView = findViewById(R.id.packetsTransmitted);
+        mPacketsReceivedTextView = findViewById(R.id.packetsReceived);
+        mElapsedTimeTextView = findViewById(R.id.elapsedTime);
     }
 
     private void setListeners(){
@@ -125,14 +151,19 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     public void onClick(View v) {
         Log.d(TAG, "onClick");
         if (v.getId() == R.id.start) {
+            mButtonStart.setEnabled(false);
+            mButtonStop.setEnabled(true);
+
             resetTestParameters();
             clearViews();
+            mElapsedTime = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
             isStartFlag = true;
             getEditTextParameters();
             startSendMessage();
         }
         else if(v.getId() == R.id.stop){
-            messageNumber = 0;
+            mButtonStart.setEnabled(true);
+            mButtonStop.setEnabled(false);
             isStartFlag = false;
         }
     }
@@ -168,41 +199,15 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         Log.d(TAG, "message = " + Arrays.toString(message));
 
 
-//        presentMessageThatSent(messageNumber, timestamp);
         messageNumber++;
         return message;
-    }
-
-    void presentMessageThatSent(final int messageNumber, final long timestamp){
-        new Thread() {
-            public void run() {
-
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            if(mSendMessageTextView.getText().toString().equals("")){
-                                StringBuilder stringBuilder = new StringBuilder();
-                                stringBuilder.append("MessageNumber: ").append(messageNumber).append("  ").append("Timestamp: ").append(timestamp);
-                                mSendMessageTextView.setText(stringBuilder);
-                            }
-                            else{
-                                String s = mSendMessageTextView.getText().toString();
-                                StringBuilder stringBuilder = new StringBuilder();
-                                stringBuilder.append(s).append("\n").append("MessageNumber: ").append(messageNumber).append("  ").append("Timestamp: ").append(timestamp);
-                                mSendMessageTextView.setText(stringBuilder);
-                            }
-                        }
-                    });
-            }
-        }.start();
     }
 
     private void startSendMessage(){
         Log.d(TAG, "startSendMessage");
 
         if(isStartFlag){
-            HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
+            final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
             handlerThread.start();
 
             final Handler timerHandler = new Handler(handlerThread.getLooper());
@@ -210,8 +215,10 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
                 @Override
                 public void run() {
+
                     sendMessage();
                     startSendMessage();
+                    handlerThread.quitSafely();
                 }
             };
 
@@ -230,7 +237,18 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
                 dp = new DatagramPacket(buildMessage(mPacketSize), mPacketSize, serverAddr, mServerPort);
                 ds.send(dp);
 
+                byte[] answerFromServer = new byte[mPacketSize];
+                dp = new DatagramPacket(answerFromServer, answerFromServer.length);
+                ds.receive(dp);
+
+                //TODO - VERIFY IF THIS WORKS FINE (check exception, and check if need to change data transmitted counter position).
+//                ds.setSoTimeout(3000);
+
+
                 Log.d(TAG, "Message has been sent.");
+                analyzeRunnable.setData(answerFromServer);
+                analyzeThread.setRunnable(analyzeRunnable);
+                analyzeThread.run();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -238,12 +256,132 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         }
     }
 
+    private int bytesToInt(byte[] bytes) {
+        return ((bytes[0] & 0xFF) << 24) |
+                ((bytes[1] & 0xFF) << 16) |
+                ((bytes[2] & 0xFF) << 8 ) |
+                ((bytes[3] & 0xFF));
+    }
+
+    public long bytesToLong(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.put(bytes);
+        buffer.flip();
+        return buffer.getLong();
+    }
+
     private void resetTestParameters(){
         messageNumber = 1;
+        messageCounter = 0;
+        numberOfMessages = 0;
+        numberOfLossPackets = 0;
+        maxDelay = Long.MIN_VALUE;
+        minDelay = Long.MAX_VALUE;
+        sumOfDelays = 0;
+        mElapsedTime = 0;
     }
 
     private void clearViews(){
-        mSendMessageTextView.setText("");
+        mAverageDelayTextView.setText(getString(R.string.average_delay));
+        mMaxDelayTextView.setText(getString(R.string.max_delay));
+        mMinDelayTextView.setText(getString(R.string.min_delay));
+        mLossRatioTextView.setText(getString(R.string.loss_ratio));
+        mPacketsTransmittedTextView.setText(getString(R.string.packets_transmitted));
+        mPacketsReceivedTextView.setText(getString(R.string.packets_received));
+        mElapsedTimeTextView.setText(getString(R.string.elapsed_time));
+    }
+
+    public class AnalyzeRunnable implements Runnable{
+        private byte[] data;
+
+        private void setData(byte[] data){
+            this.data = data;
+        }
+
+        @Override
+        public void run() {
+            byte[] clientMessageCounterByteArray = new byte[4];
+            byte[] clientTimestampByteArray = new byte[8];
+
+            for(int i = 0 ; i < 8 ; i++){
+                if(i < 4){
+                    clientMessageCounterByteArray[i] = data[i];
+                }
+
+                clientTimestampByteArray[i] = data[i+4];
+            }
+
+            int clientMessageCounter = bytesToInt(clientMessageCounterByteArray);
+            long clientTimestamp = bytesToLong(clientTimestampByteArray);
+
+            Log.d(TAG, "clientMessageCounter = " + clientMessageCounter + "  clientTimestamp = " + clientTimestamp);
+
+            numberOfMessages++;
+
+            if(!(clientMessageCounter == messageCounter + 1)){
+                numberOfLossPackets++;
+            }
+
+            messageCounter = clientMessageCounter;
+
+            long delay = TimeUnit.MILLISECONDS.toMillis(new Date().getTime()) - clientTimestamp;
+
+            Log.d(TAG, "delay = " + delay);
+
+            if(delay > maxDelay){
+                maxDelay = delay;
+            }
+
+            if(delay < minDelay){
+                minDelay = delay;
+            }
+
+            sumOfDelays += delay;
+            long averageDelay = sumOfDelays / numberOfMessages;
+            double lossRatio = (numberOfLossPackets / numberOfMessages) * 100;
+
+            StringBuilder averageDelayStringBuilder = new StringBuilder();
+            averageDelayStringBuilder.append(getString(R.string.average_delay)).append(averageDelay).append("ms");
+
+            StringBuilder maxDelayStringBuilder = new StringBuilder();
+            maxDelayStringBuilder.append(getString(R.string.max_delay)).append(maxDelay).append("ms");
+
+            StringBuilder minDelayStringBuilder = new StringBuilder();
+            minDelayStringBuilder.append(getString(R.string.min_delay)).append(minDelay).append("ms");
+
+            StringBuilder lossRatioStringBuilder = new StringBuilder();
+            lossRatioStringBuilder.append(getString(R.string.loss_ratio)).append(lossRatio).append("%");
+
+            StringBuilder packetsTransmittedStringBuilder = new StringBuilder();
+            packetsTransmittedStringBuilder.append(getString(R.string.packets_transmitted)).append(messageNumber);
+
+            StringBuilder packetsReceivedStringBuilder = new StringBuilder();
+            packetsReceivedStringBuilder.append(getString(R.string.packets_received)).append(messageNumber - numberOfLossPackets);
+
+            StringBuilder elapsedTimeStringBuilder = new StringBuilder();
+            elapsedTimeStringBuilder.append(getString(R.string.elapsed_time)).append(TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()) - mElapsedTime).append(" sec");
+
+            mAverageDelayTextView.setText(averageDelayStringBuilder);
+            mMaxDelayTextView.setText(maxDelayStringBuilder);
+            mMinDelayTextView.setText(minDelayStringBuilder);
+            mLossRatioTextView.setText(lossRatioStringBuilder);
+            mPacketsTransmittedTextView.setText(packetsTransmittedStringBuilder);
+            mPacketsReceivedTextView.setText(packetsReceivedStringBuilder);
+            mElapsedTimeTextView.setText(elapsedTimeStringBuilder);
+        }
+    }
+
+    public class AnalyzeThread extends Thread {
+
+        private Runnable runnable;
+
+        private void setRunnable(Runnable runnable){
+            this.runnable = runnable;
+        }
+
+        public void run() {
+            runOnUiThread(runnable);
+        }
     }
 
 }

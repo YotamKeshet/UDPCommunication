@@ -12,7 +12,7 @@
         android:gravity="center"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="20dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -21,9 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:text="@string/start"
-            android:focusable="true"
-            android:focusableInTouchMode="true"/>
+            android:text="@string/start" />
 
         <Button
             android:id="@+id/stop"
@@ -31,30 +29,8 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
             android:text="@string/stop"
-            android:focusable="true"
-            android:focusableInTouchMode="true"/>
+            android:enabled="false"/>
     </TableRow>
-
-
-    <ScrollView
-        android:id="@+id/scrollView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/tr_send_message"
-        android:layout_below="@id/delayEditText"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:layout_marginStart="20dp">
-
-        <TextView
-            android:id="@+id/sentMessageTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:orientation="vertical"
-            android:text=""/>
-    </ScrollView>
 
     <TextView
         android:id="@+id/ipTextView"
@@ -164,5 +140,107 @@
         android:digits="0,1,2,3,4,5,6,7,8,9"
         android:focusable="true"
         android:focusableInTouchMode="true"/>
+
+    <TextView
+        android:id="@+id/measurement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/measurement"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/delayEditText"
+        android:layout_marginTop="20dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+
+    <TextView
+        android:id="@+id/averageDelay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/average_delay"
+        android:textSize="18sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/measurement"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/maxDelay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/max_delay"
+        android:textSize="18sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/averageDelay"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/minDelay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/min_delay"
+        android:textSize="18sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/maxDelay"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/packetsTransmitted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/packets_transmitted"
+        android:textSize="18sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/minDelay"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+
+    <TextView
+        android:id="@+id/packetsReceived"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/packets_received"
+        android:textSize="18sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/packetsTransmitted"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/lossRatio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/loss_ratio"
+        android:textSize="18sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/packetsReceived"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/elapsedTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/elapsed_time"
+        android:textSize="18sp"
+        android:layout_marginStart="20dp"
+        android:layout_below="@+id/lossRatio"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
 
 </RelativeLayout>
