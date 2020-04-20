@@ -59,4 +59,32 @@
         android:focusable="true"
         android:focusableInTouchMode="true"/>
 
+    <TextView
+        android:id="@+id/packetSizeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/packet_size_bytes"
+        android:layout_below="@+id/portTextView"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+
+    <EditText
+        android:id="@+id/packetSizeEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="4"
+        android:inputType="textPersonName"
+        android:text=""
+        android:layout_below="@+id/portEditText"
+        android:layout_toEndOf="@+id/packetSizeTextView"
+        android:digits="0,1,2,3,4,5,6,7,8,9"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+
 </RelativeLayout>

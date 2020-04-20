@@ -20,10 +20,12 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
     private static final String TAG = "UDPServerSocketActivity";
 
     private int mServerPort;
+    private int mPacketSize;
 
     private Button buttonStartReceiving;
     private Button buttonStopReceiving;
     private EditText mPortEditText;
+    private EditText mPacketSizeEditText;
 
     private boolean isStartFlag = false;
 
@@ -42,6 +44,7 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
         buttonStartReceiving =  findViewById(R.id.btn_start_receiving);
         buttonStopReceiving = findViewById(R.id.btn_stop_receiving);
         mPortEditText = findViewById(R.id.portEditText);
+        mPacketSizeEditText = findViewById(R.id.packetSizeEditText);
     }
 
     private void setListeners(){
@@ -67,7 +70,7 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
             @Override
             public void run() {
                 while(isStartFlag){
-                    byte[] msg = new byte[28];
+                    byte[] msg = new byte[mPacketSize];
                     DatagramPacket dp = new DatagramPacket(msg, msg.length);
                     try (DatagramSocket ds = new DatagramSocket(mServerPort)) {
                         //ds.setSoTimeout(50000);
@@ -88,6 +91,7 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
 
         });
 
+        thread.setPriority(Thread.MAX_PRIORITY);
         thread.start();
     }
 
@@ -119,8 +123,9 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
 
     private void getEditTextParameters(){
         mServerPort = Integer.valueOf(mPortEditText.getText().toString());
+        mPacketSize = Integer.valueOf(mPacketSizeEditText.getText().toString());
 
-        Log.d(TAG, "mServerPort = " + mServerPort);
+        Log.d(TAG, "mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize);
     }
 
 }
