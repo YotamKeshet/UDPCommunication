@@ -229,10 +229,20 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
             startSendMessage();
         }
         else if(v.getId() == R.id.stop){
-            mButtonStart.setEnabled(true);
-            mButtonStop.setEnabled(false);
-            isStartFlag = false;
-            updateUI();
+            new Thread() {
+                public void run() {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                mButtonStart.setEnabled(true);
+                                mButtonStop.setEnabled(false);
+                                isStartFlag = false;
+                                updateUI();
+                            }
+                        });
+                }
+            }.start();
         }
     }
 
