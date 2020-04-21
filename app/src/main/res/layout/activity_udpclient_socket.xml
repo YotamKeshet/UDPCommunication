@@ -12,7 +12,7 @@
         android:gravity="center"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="5dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -37,8 +37,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="IP: "
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -49,22 +50,22 @@
         android:id="@+id/ipEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text=""
+        android:layout_marginStart="0dp"
         android:layout_toEndOf="@+id/ipTextView"
-        android:layout_marginStart="20dp"
+        android:ems="10"
         android:focusable="true"
-        android:focusableInTouchMode="true"/>
+        android:focusableInTouchMode="true"
+        android:inputType="textPersonName"
+        android:text="" />
 
     <TextView
         android:id="@+id/portTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Port: "
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:layout_below="@+id/ipTextView"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="18dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
@@ -91,7 +92,7 @@
         android:layout_height="wrap_content"
         android:text="@string/packet_size_bytes"
         android:layout_below="@+id/portTextView"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
@@ -119,8 +120,8 @@
         android:layout_height="wrap_content"
         android:text="@string/delay_ms"
         android:layout_below="@+id/packetSizeTextView"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"
+        android:textSize="15sp"
+        android:layout_marginTop="25dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
@@ -147,8 +148,8 @@
         android:layout_height="wrap_content"
         android:text="@string/test_duration"
         android:layout_below="@+id/delayTextView"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"
+        android:textSize="15sp"
+        android:layout_marginTop="25dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
@@ -170,15 +171,43 @@
         android:focusableInTouchMode="true"/>
 
     <TextView
+        android:id="@+id/JitterBufferTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/jitter_buffer_ms"
+        android:layout_below="@+id/TestDurationTextView"
+        android:textSize="15sp"
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="20dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+
+    <EditText
+        android:id="@+id/JitterBufferEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="4"
+        android:inputType="textPersonName"
+        android:text=""
+        android:layout_below="@+id/TestDurationEditText"
+        android:layout_toEndOf="@+id/JitterBufferTextView"
+        android:digits="0,1,2,3,4,5,6,7,8,9"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+
+    <TextView
         android:id="@+id/measurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/measurement"
         android:textStyle="bold"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:layout_marginStart="20dp"
-        android:layout_below="@+id/TestDurationEditText"
-        android:layout_marginTop="20dp"
+        android:layout_below="@+id/JitterBufferEditText"
+        android:layout_marginTop="12dp"
         android:focusable="true"
         android:focusableInTouchMode="true"/>
 
@@ -187,7 +216,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/average_delay"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
         android:layout_below="@+id/measurement"
         android:focusable="true"
@@ -200,7 +229,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/max_delay"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
         android:layout_below="@+id/averageDelay"
         android:focusable="true"
@@ -213,7 +242,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/min_delay"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
         android:layout_below="@+id/maxDelay"
         android:focusable="true"
@@ -226,7 +255,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/packets_transmitted"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
         android:layout_below="@+id/minDelay"
         android:focusable="true"
@@ -237,7 +266,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/packets_received"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
         android:layout_below="@+id/packetsTransmitted"
         android:focusable="true"
@@ -250,7 +279,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/loss_ratio"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
         android:layout_below="@+id/packetsReceived"
         android:focusable="true"
@@ -263,7 +292,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/elapsed_time"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:layout_marginStart="20dp"
         android:layout_below="@+id/lossRatio"
         android:focusable="true"

@@ -16,4 +16,5 @@
     <string name="packets_received">Packets Received:</string>
     <string name="elapsed_time">Elapsed Time:</string>
     <string name="test_duration">Test Duration[Sec]:</string>
+    <string name="jitter_buffer_ms">Jitter Buffer[ms]:</string>
 </resources>

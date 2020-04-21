@@ -116,7 +116,7 @@ public class ClientService extends Service {
     }
 
     public void startSendMessage(final String serverIp, final int serverPort, final int packetSize, final int delay){
-        Log.d(TAG, "startSendMessage");
+        Log.d(TAG, "startSendMessage, packetSize = " + packetSize + "  delay = " + delay);
 
         if(isStartFlag){
             final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
@@ -138,7 +138,7 @@ public class ClientService extends Service {
 
     }
 
-    public void startReceiveMessages(final int packetSize, final int delay){
+    public void startReceiveMessages(final int packetSize, final int delay, final int jitterBuffer){
         Log.d(TAG, "startReceiveMessages");
         isStartFlag = true;
 
@@ -150,7 +150,7 @@ public class ClientService extends Service {
 
             @Override
             public void run() {
-                receiveMessage(packetSize, delay);
+                receiveMessage(packetSize, delay, jitterBuffer);
             }
         };
 
@@ -191,7 +191,7 @@ public class ClientService extends Service {
         }
     }
 
-    private void receiveMessage(int packetSize, int delay){
+    private void receiveMessage(int packetSize, int delay, int jitterBuffer){
         Log.d(TAG, "receiveMessage");
         while(true){
             try{
@@ -204,7 +204,7 @@ public class ClientService extends Service {
 
                 Log.d(TAG, "Message has been received.");
 
-                analyzeData(answerFromServer);
+                analyzeData(answerFromServer, jitterBuffer);
             }
             catch(UnknownHostException e){
                 Log.e(TAG, "Fail to find host");
@@ -258,7 +258,7 @@ public class ClientService extends Service {
         return message;
     }
 
-    private void analyzeData(byte[] data){
+    private void analyzeData(byte[] data, int jitterBuffer){
         byte[] clientMessageCounterByteArray = new byte[4];
         byte[] clientTimestampByteArray = new byte[8];
 
@@ -276,18 +276,22 @@ public class ClientService extends Service {
         Log.d(TAG, "clientMessageCounter = " + clientMessageCounter + "  clientTimestamp = " + clientTimestamp);
 
         long delay = TimeUnit.MILLISECONDS.toMillis(new Date().getTime()) - clientTimestamp;
-
         Log.d(TAG, "delay = " + delay);
 
-        if(delay > maxDelay){
-            maxDelay = delay;
-        }
+        if(delay < jitterBuffer){
+            if(delay > maxDelay){
+                maxDelay = delay;
+            }
 
-        if(delay < minDelay){
-            minDelay = delay;
-        }
+            if(delay < minDelay){
+                minDelay = delay;
+            }
 
-        sumOfDelays += delay;
+            sumOfDelays += delay;
+        }
+        else{
+            packetsReceived--;
+        }
     }
 
     public void resetTestParameters(){

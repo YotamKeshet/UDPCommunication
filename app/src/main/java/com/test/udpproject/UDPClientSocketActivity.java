@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -31,6 +30,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private EditText mPacketSizeEditText;
     private EditText mDelayEditText;
     private EditText mTestDurationEditText;
+    private EditText mJitterBufferEditText;
     private TextView mAverageDelayTextView;
     private TextView mMaxDelayTextView;
     private TextView mMinDelayTextView;
@@ -46,6 +46,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private String mServerIp;
     private int mPacketSize;
     private int mDelay;
+    private int mJitterBuffer;
 
     private long mElapsedTime = 0;
     private long mTestDuration = 0;
@@ -60,8 +61,6 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_udpclient_socket);
-
-
 
         initializeViews();
         setListeners();
@@ -92,6 +91,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mPacketsReceivedTextView = findViewById(R.id.packetsReceived);
         mElapsedTimeTextView = findViewById(R.id.elapsedTime);
         mTestDurationEditText = findViewById(R.id.TestDurationEditText);
+        mJitterBufferEditText = findViewById(R.id.JitterBufferEditText);
     }
 
     private ServiceConnection setServiceConnection(){
@@ -224,6 +224,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mPacketSize = Integer.valueOf(mPacketSizeEditText.getText().toString());
         mDelay = Integer.valueOf(mDelayEditText.getText().toString());
         mTestDuration = Integer.valueOf(mTestDurationEditText.getText().toString());
+        mJitterBuffer = Integer.valueOf(mJitterBufferEditText.getText().toString());
 
         Log.d(TAG, "mServerIp = " + mServerIp + "  mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize + "  mDelay = " + mDelay);
     }
@@ -242,7 +243,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
             mElapsedTime = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
 
             getEditTextParameters();
-            mClientService.startReceiveMessages(mPacketSize, mDelay);
+            mClientService.startReceiveMessages(mPacketSize, mDelay, mJitterBuffer);
             mClientService.startSendMessage(mServerIp, mServerPort, mPacketSize, mDelay);
             updateUI();
             updateUi = true;
