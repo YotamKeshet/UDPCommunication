@@ -2,18 +2,18 @@ package com.test.udpproject;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 
 public class UDPServerSocketActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -27,8 +27,8 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
     private EditText mPortEditText;
     private EditText mPacketSizeEditText;
 
-    private boolean isStartFlag = false;
-
+    private ServiceConnection mServiceConnection;
+    private ServerService mServerService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +38,31 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
 
         initializeViews();
         setListeners();
+        mServiceConnection = setServiceConnection();
+
+        Intent intent = new Intent(this, ServerService.class);
+        bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+    }
+
+    private ServiceConnection setServiceConnection(){
+        return new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                Log.d(TAG, "onServiceConnected");
+                mServerService = ((ServerService.LocalBinder) iBinder).getService();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+
+            }
+        };
     }
 
     private void initializeViews(){
@@ -63,40 +88,6 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
         return super.dispatchTouchEvent(ev);
     }
 
-    private void startServerSocket() {
-        Log.d(TAG, "startServerSocket");
-        Thread thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                while(isStartFlag){
-                    byte[] msg = new byte[mPacketSize];
-                    DatagramPacket dp = new DatagramPacket(msg, msg.length);
-                    try (DatagramSocket ds = new DatagramSocket(mServerPort)) {
-                        //ds.setSoTimeout(50000);
-                        ds.receive(dp);
-
-                        Log.d(TAG, "Message has been received.");
-
-                        dp = new DatagramPacket(dp.getData(), dp.getData().length, dp.getAddress(), dp.getPort());
-                        ds.send(dp);
-
-                        Log.d(TAG, "Message has been sent.");
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-        });
-
-        thread.setPriority(Thread.MAX_PRIORITY);
-        thread.start();
-    }
-
-
-
     @Override
     public void onClick(View v) {
         Log.d(TAG, "onClick");
@@ -104,17 +95,14 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
         switch (v.getId()) {
 
             case R.id.btn_start_receiving:
-                isStartFlag = true;
                 getEditTextParameters();
-                startServerSocket();
-
+                mServerService.startServerSocket(mPacketSize, mServerPort);
                 buttonStartReceiving.setEnabled(false);
                 buttonStopReceiving.setEnabled(true);
                 break;
 
             case R.id.btn_stop_receiving:
-                isStartFlag = false;
-
+                mServerService.stopServerSocket();
                 buttonStartReceiving.setEnabled(true);
                 buttonStopReceiving.setEnabled(false);
                 break;
@@ -127,5 +115,7 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
 
         Log.d(TAG, "mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize);
     }
+
+
 
 }
