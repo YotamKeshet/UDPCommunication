@@ -25,6 +25,10 @@
             android:name=".ServerService"
             android:enabled="true" />
 
+        <service
+            android:name=".ClientService"
+            android:enabled="true" />
+
     </application>
 
 
