@@ -1,12 +1,19 @@
 package com.test.udpproject;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -18,6 +25,34 @@ public class ServerService extends Service {
     private LocalBinder myService = new LocalBinder();
     private boolean isStartFlag = false;
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        runAsForeground();
+    }
+
+    private void runAsForeground() {
+        String channelName = getString(R.string.app_name);
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder mNotificationBuilder = new NotificationCompat.Builder(this, "com.test.udpproject");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel chan = new NotificationChannel("com.test.udpproject", channelName, NotificationManager.IMPORTANCE_DEFAULT);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            if (mNotificationManager != null) {
+                mNotificationManager.createNotificationChannel(chan);
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mNotificationBuilder.setPriority(NotificationManager.IMPORTANCE_MIN);
+        }
+
+        Notification mNotification = mNotificationBuilder.setOngoing(true).setSmallIcon(R.mipmap.ic_launcher).setContentTitle("UDP server is running in background").setContentText("").setCategory(Notification.CATEGORY_SERVICE).setTicker("").build();
+        startForeground(1, mNotification);
+    }
 
     @Nullable
     @Override
