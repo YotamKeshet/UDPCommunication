@@ -34,6 +34,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private EditText mPortEditText;
     private EditText mPacketSizeEditText;
     private EditText mDelayEditText;
+    private EditText mTestDurationEditText;
     private TextView mAverageDelayTextView;
     private TextView mMaxDelayTextView;
     private TextView mMinDelayTextView;
@@ -48,6 +49,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private long minDelay = Long.MAX_VALUE;
     private long sumOfDelays = 0;
     private long mElapsedTime = 0;
+    private long mTestDuration = 0;
     int messageNumber = 1;
 
 
@@ -109,6 +111,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mPacketsTransmittedTextView = findViewById(R.id.packetsTransmitted);
         mPacketsReceivedTextView = findViewById(R.id.packetsReceived);
         mElapsedTimeTextView = findViewById(R.id.elapsedTime);
+        mTestDurationEditText = findViewById(R.id.TestDurationEditText);
     }
 
     private void setListeners(){
@@ -204,6 +207,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mServerPort = Integer.valueOf(mPortEditText.getText().toString());
         mPacketSize = Integer.valueOf(mPacketSizeEditText.getText().toString());
         mDelay = Integer.valueOf(mDelayEditText.getText().toString());
+        mTestDuration = Integer.valueOf(mTestDurationEditText.getText().toString());
 
         Log.d(TAG, "mServerIp = " + mServerIp + "  mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize + "  mDelay = " + mDelay);
     }
@@ -279,6 +283,11 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
                 @Override
                 public void run() {
+
+                    if(mTestDuration < (TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()) - mElapsedTime)){
+                        mButtonStop.callOnClick();
+                        return;
+                    }
 
                     sendMessage();
                     startSendMessage();
@@ -389,6 +398,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         minDelay = Long.MAX_VALUE;
         sumOfDelays = 0;
         mElapsedTime = 0;
+        mTestDuration = 0;
     }
 
     private void clearViews(){

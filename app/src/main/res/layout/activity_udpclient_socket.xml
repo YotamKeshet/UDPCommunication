@@ -142,6 +142,34 @@
         android:focusableInTouchMode="true"/>
 
     <TextView
+        android:id="@+id/TestDurationTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/test_duration"
+        android:layout_below="@+id/delayTextView"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+
+    <EditText
+        android:id="@+id/TestDurationEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="4"
+        android:inputType="textPersonName"
+        android:text=""
+        android:layout_below="@+id/delayEditText"
+        android:layout_toEndOf="@+id/TestDurationTextView"
+        android:digits="0,1,2,3,4,5,6,7,8,9"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+
+    <TextView
         android:id="@+id/measurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -149,7 +177,7 @@
         android:textStyle="bold"
         android:textSize="20sp"
         android:layout_marginStart="20dp"
-        android:layout_below="@+id/delayEditText"
+        android:layout_below="@+id/TestDurationEditText"
         android:layout_marginTop="20dp"
         android:focusable="true"
         android:focusableInTouchMode="true"/>
