@@ -31,7 +31,9 @@
             android:name=".ClientService"
             android:enabled="true" />
 
-        <receiver android:name=".OnAlarmReceiver"></receiver>
+        <receiver android:name=".OnAlarmReceiver"
+            android:enabled="true">
+        </receiver>
 
     </application>
 

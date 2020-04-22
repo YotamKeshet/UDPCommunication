@@ -46,6 +46,7 @@ public class ClientService extends Service {
     private long sumOfDelays = 0;
 
     private OnAlarmReceiver mOnAlarmReceiver;
+    private AlarmReceiverCallback mAlarmReceiverCallback;
 
     @Override
     public void onCreate() {
@@ -101,14 +102,14 @@ public class ClientService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        mOnAlarmReceiver = new OnAlarmReceiver();
+        setAlarmCallback();
+        mOnAlarmReceiver = new OnAlarmReceiver(mAlarmReceiverCallback);
         return myService;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         handlerThreadReceive.quitSafely();
-        mOnAlarmReceiver.cancelAlarm(this);
         return super.onUnbind(intent);
     }
 
@@ -119,18 +120,37 @@ public class ClientService extends Service {
         }
     }
 
+    private void setAlarmCallback(){
+        mAlarmReceiverCallback = new AlarmReceiverCallback() {
+            @Override
+            public void startSendMessageFromCallback(final String serverIp, final int serverPort, final int packetSize) {
+
+                final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
+                handlerThread.start();
+
+                final Handler timerHandler = new Handler(handlerThread.getLooper());
+                Runnable timerRunnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        sendMessage(serverIp, serverPort, packetSize);
+                        handlerThread.quitSafely();
+                    }
+                };
+
+                timerHandler.postDelayed(timerRunnable, 0);
+
+            }
+        };
+    }
+
     public void startSendMessage(final String serverIp, final int serverPort, final int packetSize, final int delay){
         Log.d(TAG, "startSendMessage, packetSize = " + packetSize + "  delay = " + delay);
 
         if(isStartFlag){
 
             if(delay > 60000){
-                mOnAlarmReceiver.setAlarm(this, new AlarmReceiverCallback() {
-                    @Override
-                    public void sendMessage(String serverIp, int serverPort, int packetSize) {
-                        startSendMessage(serverIp, serverPort, packetSize, delay);
-                    }
-                },serverIp, serverPort, packetSize, delay);
+                mOnAlarmReceiver.setAlarm(this, serverIp, serverPort, packetSize, delay);
             }
             else{
                 final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
@@ -173,6 +193,7 @@ public class ClientService extends Service {
 
     public void stopTest(){
         Log.d(TAG, "stopTest");
+        mOnAlarmReceiver.cancelAlarm(this);
         isStartFlag = false;
     }
 
@@ -182,7 +203,7 @@ public class ClientService extends Service {
     }
 
     private void sendMessage(String serverIp, int serverPort, int packetSize){
-        Log.d(TAG, "sendMessage");
+        Log.d(TAG, "startSendMessageFromCallback");
         if(isStartFlag){
             try{
                 // IP Address below is the IP address of that Device where server socket is opened.
@@ -211,8 +232,8 @@ public class ClientService extends Service {
             try{
                 byte[] answerFromServer = new byte[packetSize];
                 DatagramPacket dp = new DatagramPacket(answerFromServer, answerFromServer.length);
+                mDatagramSocket.setSoTimeout(10000);
                 mDatagramSocket.receive(dp);
-                mDatagramSocket.setSoTimeout(delay + 10000);
 
                 packetsReceived++;
 

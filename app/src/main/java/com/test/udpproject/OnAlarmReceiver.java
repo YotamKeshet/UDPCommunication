@@ -8,51 +8,58 @@ import android.content.Intent;
 import android.os.PowerManager;
 import android.util.Log;
 
+import java.util.Objects;
+
 public class OnAlarmReceiver extends BroadcastReceiver {
 
     private static final String TAG = "OnAlarmReceiver";
-    private AlarmReceiverCallback mAlarmReceiverCallback;
-    private String mServerIp;
-    private int mServerPort;
-    private int mPacketSize;
+    private static AlarmReceiverCallback mAlarmReceiverCallback;
+    private static String mServerIp;
+    private static int mServerPort;
+    private static int mPacketSize;
 
-    public OnAlarmReceiver() {
+    public OnAlarmReceiver(AlarmReceiverCallback alarmReceiverCallback) {
+        mAlarmReceiverCallback = alarmReceiverCallback;
     }
+
+    public OnAlarmReceiver(){}
 
     @Override
     public void onReceive(Context context, Intent intent)
     {
         Log.d(TAG, "onReceive");
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = null;
-        if (pm != null) {
-            wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ClientAlarm:TAG");
-        }
-        if (wl != null) {
-            wl.acquire(10);
-        }
+        if(Objects.equals(intent.getAction(), "INTENT_ALARM_ACTION")){
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock wl = null;
+            if (pm != null) {
+                wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ClientAlarm:TAG");
+            }
+            if (wl != null) {
+                wl.acquire(10);
+            }
 
-        mAlarmReceiverCallback.sendMessage(mServerIp, mServerPort, mPacketSize);
+            mAlarmReceiverCallback.startSendMessageFromCallback(mServerIp, mServerPort, mPacketSize);
 
-        if (wl != null) {
-            wl.release();
+            if (wl != null) {
+                wl.release();
+            }
         }
     }
 
-    public void setAlarm(Context context, AlarmReceiverCallback alarmReceiverCallback, String serverIp, int serverPort, int packetSize, long delay)
+    public void setAlarm(Context context, String serverIp, int serverPort, int packetSize, long delay)
     {
         Log.d(TAG, "setAlarm");
 
-        mAlarmReceiverCallback = alarmReceiverCallback;
         mServerIp = serverIp;
         mServerPort = serverPort;
         mPacketSize = packetSize;
 
         AlarmManager am =( AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, OnAlarmReceiver.class);
+        i.setAction("INTENT_ALARM_ACTION");
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
         if (am != null) {
-            am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), delay, pi);
+            am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delay, delay, pi);
         }
     }
 
