@@ -44,6 +44,8 @@ public class ClientService extends Service {
     private long minDelay = Long.MAX_VALUE;
     private long sumOfDelays = 0;
 
+    private OnAlarmReceiver mOnAlarmReceiver;
+
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
@@ -86,6 +88,7 @@ public class ClientService extends Service {
 
     private void initialize(){
         Log.d(TAG, "initialize");
+
         try {
             mDatagramSocket = new DatagramSocket();
         } catch (SocketException e) {
@@ -97,12 +100,14 @@ public class ClientService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        mOnAlarmReceiver = new OnAlarmReceiver();
         return myService;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         handlerThreadReceive.quitSafely();
+        mOnAlarmReceiver.cancelAlarm(this);
         return super.onUnbind(intent);
     }
 
@@ -117,23 +122,33 @@ public class ClientService extends Service {
         Log.d(TAG, "startSendMessage, packetSize = " + packetSize + "  delay = " + delay);
 
         if(isStartFlag){
-            final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
-            handlerThread.start();
 
-            final Handler timerHandler = new Handler(handlerThread.getLooper());
-            Runnable timerRunnable = new Runnable() {
+            if(delay > 60000){
+                mOnAlarmReceiver.setAlarm(this, new AlarmReceiverCallback() {
+                    @Override
+                    public void sendMessage(String serverIp, int serverPort, int packetSize) {
+                        startSendMessage(serverIp, serverPort, packetSize, delay);
+                    }
+                },serverIp, serverPort, packetSize, delay);
+            }
+            else{
+                final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
+                handlerThread.start();
 
-                @Override
-                public void run() {
-                    sendMessage(serverIp, serverPort, packetSize);
-                    startSendMessage(serverIp, serverPort, packetSize, delay);
-                    handlerThread.quitSafely();
-                }
-            };
+                final Handler timerHandler = new Handler(handlerThread.getLooper());
+                Runnable timerRunnable = new Runnable() {
 
-            timerHandler.postDelayed(timerRunnable, delay);
+                    @Override
+                    public void run() {
+                        sendMessage(serverIp, serverPort, packetSize);
+                        startSendMessage(serverIp, serverPort, packetSize, delay);
+                        handlerThread.quitSafely();
+                    }
+                };
+
+                timerHandler.postDelayed(timerRunnable, delay);
+            }
         }
-
     }
 
     public void startReceiveMessages(final int packetSize, final int delay, final int jitterBuffer){
