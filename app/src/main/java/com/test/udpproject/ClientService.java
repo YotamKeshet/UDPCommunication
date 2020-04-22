@@ -27,6 +27,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class ClientService extends Service {
 
@@ -240,7 +241,8 @@ public class ClientService extends Service {
         byte[] counterBytes = ByteBuffer.allocate(4).putInt(messageNumber).array();
         Log.d(TAG, "messageNumber = " + messageNumber + "  counterBytes = " + Arrays.toString(counterBytes));
 
-        long timestamp = System.currentTimeMillis();
+        long timestamp = System.nanoTime();
+
         byte[] timestampBytes = ByteBuffer.allocate(28).putLong(timestamp).array();
         Log.d(TAG, "timestamp = " + timestamp + "  timestampBytes = " + Arrays.toString(timestampBytes));
 
@@ -271,7 +273,7 @@ public class ClientService extends Service {
         return message;
     }
 
-    private void analyzeData(byte[] data, int jitterBuffer){
+    private synchronized void analyzeData(byte[] data, int jitterBuffer){
         byte[] clientMessageCounterByteArray = new byte[4];
         byte[] clientTimestampByteArray = new byte[8];
 
@@ -288,7 +290,8 @@ public class ClientService extends Service {
 
         Log.d(TAG, "clientMessageCounter = " + clientMessageCounter + "  clientTimestamp = " + clientTimestamp);
 
-        long delay = System.currentTimeMillis() - clientTimestamp;
+        long delayNano = System.nanoTime() - clientTimestamp;
+        long delay = TimeUnit.MILLISECONDS.convert(delayNano, TimeUnit.NANOSECONDS);
         Log.d(TAG, "delay = " + delay);
 
         if(delay < jitterBuffer){
