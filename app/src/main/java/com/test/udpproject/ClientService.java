@@ -27,8 +27,6 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class ClientService extends Service {
 
@@ -227,7 +225,7 @@ public class ClientService extends Service {
         byte[] counterBytes = ByteBuffer.allocate(4).putInt(messageNumber).array();
         Log.d(TAG, "messageNumber = " + messageNumber + "  counterBytes = " + Arrays.toString(counterBytes));
 
-        long timestamp = TimeUnit.MILLISECONDS.toMillis(new Date().getTime());
+        long timestamp = System.currentTimeMillis();
         byte[] timestampBytes = ByteBuffer.allocate(28).putLong(timestamp).array();
         Log.d(TAG, "timestamp = " + timestamp + "  timestampBytes = " + Arrays.toString(timestampBytes));
 
@@ -275,7 +273,7 @@ public class ClientService extends Service {
 
         Log.d(TAG, "clientMessageCounter = " + clientMessageCounter + "  clientTimestamp = " + clientTimestamp);
 
-        long delay = TimeUnit.MILLISECONDS.toMillis(new Date().getTime()) - clientTimestamp;
+        long delay = System.currentTimeMillis() - clientTimestamp;
         Log.d(TAG, "delay = " + delay);
 
         if(delay < jitterBuffer){
