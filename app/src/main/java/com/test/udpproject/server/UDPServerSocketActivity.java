@@ -1,4 +1,4 @@
-package com.test.udpproject;
+package com.test.udpproject.server;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.test.udpproject.R;
 
 public class UDPServerSocketActivity extends AppCompatActivity implements View.OnClickListener {
 

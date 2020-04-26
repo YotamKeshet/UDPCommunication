@@ -1,4 +1,4 @@
-package com.test.udpproject;
+package com.test.udpproject.client;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

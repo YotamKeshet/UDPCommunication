@@ -1,4 +1,4 @@
-package com.test.udpproject;
+package com.test.udpproject.client;
 
 
 import android.app.Notification;
@@ -17,6 +17,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+import com.test.udpproject.R;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

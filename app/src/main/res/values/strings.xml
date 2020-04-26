@@ -17,4 +17,7 @@
     <string name="elapsed_time">Elapsed Time:</string>
     <string name="test_duration">Test Duration[Sec]:</string>
     <string name="jitter_buffer_ms">Jitter Buffer[ms]:</string>
+    <string name="icmp">ICMP</string>
+    <string name="count">Count:</string>
+    <string name="wait">Wait:</string>
 </resources>

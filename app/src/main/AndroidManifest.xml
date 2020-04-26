@@ -2,19 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.test.udpproject">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme">
-        <activity android:name=".UDPServerSocketActivity"></activity>
-        <activity android:name=".UDPClientSocketActivity" />
+        <activity android:name=".icmp.ICMPActivity"></activity>
+        <activity android:name=".server.UDPServerSocketActivity" />
+        <activity android:name=".client.UDPClientSocketActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,19 +19,20 @@
             </intent-filter>
         </activity>
 
+        <receiver
+            android:name=".client.OnAlarmReceiver"
+            android:enabled="true"></receiver>
         <service
-            android:name=".ServerService"
+            android:name=".client.ClientService"
             android:enabled="true" />
 
         <service
-            android:name=".ClientService"
+            android:name=".server.ServerService"
             android:enabled="true" />
-
-        <receiver android:name=".OnAlarmReceiver"
-            android:enabled="true">
-        </receiver>
-
     </application>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

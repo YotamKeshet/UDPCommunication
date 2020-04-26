@@ -1,4 +1,4 @@
-package com.test.udpproject;
+package com.test.udpproject.client;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +18,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.test.udpproject.R;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;

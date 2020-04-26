@@ -1,13 +1,13 @@
-package com.test.udpproject;
+package com.test.udpproject.client;
 
-public class UpdateObject {
+class UpdateObject {
     private int packetsTransmitted;
     private int packetsReceived;
     private long maxDelay;
     private long minDelay;
     private long sumOfDelays;
 
-    public UpdateObject(int packetsTransmitted, int packetsReceived, long maxDelay, long minDelay, long sumOfDelays) {
+    UpdateObject(int packetsTransmitted, int packetsReceived, long maxDelay, long minDelay, long sumOfDelays) {
         this.packetsTransmitted = packetsTransmitted;
         this.packetsReceived = packetsReceived;
         this.maxDelay = maxDelay;
@@ -16,23 +16,23 @@ public class UpdateObject {
     }
 
 
-    public int getPacketsTransmitted() {
+    int getPacketsTransmitted() {
         return packetsTransmitted;
     }
 
-    public int getPacketsReceived() {
+    int getPacketsReceived() {
         return packetsReceived;
     }
 
-    public long getMaxDelay() {
+    long getMaxDelay() {
         return maxDelay;
     }
 
-    public long getMinDelay() {
+    long getMinDelay() {
         return minDelay;
     }
 
-    public long getSumOfDelays() {
+    long getSumOfDelays() {
         return sumOfDelays;
     }
 }
