@@ -250,7 +250,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
             getEditTextParameters();
             mClientService.startReceiveMessages(mPacketSize, mDelay, mJitterBuffer, mNumberOfPacketsToIgnored);
-            mClientService.startSendMessage(mServerIp, mServerPort, mPacketSize, mDelay);
+            mClientService.startSendMessage(mServerIp, mServerPort, mPacketSize, mDelay, mNumberOfPacketsToIgnored);
             updateUI();
             mUpdateUi = true;
         }

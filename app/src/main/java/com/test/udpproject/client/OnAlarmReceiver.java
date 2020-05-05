@@ -17,6 +17,7 @@ public class OnAlarmReceiver extends BroadcastReceiver {
     private static String mServerIp;
     private static int mServerPort;
     private static int mPacketSize;
+    private static int mPacketToIgnored;
 
     public OnAlarmReceiver(AlarmReceiverCallback alarmReceiverCallback) {
         mAlarmReceiverCallback = alarmReceiverCallback;
@@ -38,7 +39,7 @@ public class OnAlarmReceiver extends BroadcastReceiver {
                 wl.acquire(10);
             }
 
-            mAlarmReceiverCallback.startSendMessageFromCallback(mServerIp, mServerPort, mPacketSize);
+            mAlarmReceiverCallback.startSendMessageFromCallback(mServerIp, mServerPort, mPacketSize, mPacketToIgnored);
 
             if (wl != null) {
                 wl.release();
@@ -46,13 +47,14 @@ public class OnAlarmReceiver extends BroadcastReceiver {
         }
     }
 
-    public void setAlarm(Context context, String serverIp, int serverPort, int packetSize, long delay)
+    public void setAlarm(Context context, String serverIp, int serverPort, int packetSize, long delay, int packetToIgnored)
     {
         Log.d(TAG, "setAlarm");
 
         mServerIp = serverIp;
         mServerPort = serverPort;
         mPacketSize = packetSize;
+        mPacketToIgnored = packetToIgnored;
 
         AlarmManager am =( AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, OnAlarmReceiver.class);

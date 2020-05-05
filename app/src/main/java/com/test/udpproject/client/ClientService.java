@@ -125,7 +125,7 @@ public class ClientService extends Service {
     private void setAlarmCallback(){
         mAlarmReceiverCallback = new AlarmReceiverCallback() {
             @Override
-            public void startSendMessageFromCallback(final String serverIp, final int serverPort, final int packetSize) {
+            public void startSendMessageFromCallback(final String serverIp, final int serverPort, final int packetSize, final int packetToIgnored) {
 
                 final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
                 handlerThread.start();
@@ -135,7 +135,7 @@ public class ClientService extends Service {
 
                     @Override
                     public void run() {
-                        sendMessage(serverIp, serverPort, packetSize);
+                        sendMessage(serverIp, serverPort, packetSize, packetToIgnored);
                         handlerThread.quitSafely();
                     }
                 };
@@ -146,13 +146,13 @@ public class ClientService extends Service {
         };
     }
 
-    public void startSendMessage(final String serverIp, final int serverPort, final int packetSize, final int delay){
+    public void startSendMessage(final String serverIp, final int serverPort, final int packetSize, final int delay, final int packetToIgnored){
         Log.d(TAG, "startSendMessage, packetSize = " + packetSize + "  delay = " + delay);
 
         if(isStartFlag){
 
             if(delay > 60000){
-                mOnAlarmReceiver.setAlarm(this, serverIp, serverPort, packetSize, delay);
+                mOnAlarmReceiver.setAlarm(this, serverIp, serverPort, packetSize, delay, packetToIgnored);
             }
             else{
                 final HandlerThread handlerThread = new HandlerThread("sendMessagesHandlerThread");
@@ -163,8 +163,8 @@ public class ClientService extends Service {
 
                     @Override
                     public void run() {
-                        sendMessage(serverIp, serverPort, packetSize);
-                        startSendMessage(serverIp, serverPort, packetSize, delay);
+                        sendMessage(serverIp, serverPort, packetSize, packetToIgnored);
+                        startSendMessage(serverIp, serverPort, packetSize, delay, packetToIgnored);
                         handlerThread.quitSafely();
                     }
                 };
@@ -204,7 +204,7 @@ public class ClientService extends Service {
         return new UpdateObject(packetsTransmitted, packetsReceived, maxDelay, minDelay, sumOfDelays);
     }
 
-    private void sendMessage(String serverIp, int serverPort, int packetSize){
+    private void sendMessage(String serverIp, int serverPort, int packetSize, int packetsToIgnored){
         Log.d(TAG, "startSendMessageFromCallback");
         if(isStartFlag){
             try{
@@ -213,7 +213,10 @@ public class ClientService extends Service {
                 DatagramPacket dp;
                 dp = new DatagramPacket(buildMessage(packetSize), packetSize, serverAddr, serverPort);
                 mDatagramSocket.send(dp);
-                packetsTransmitted++;
+
+                if(messageNumber - 1 > packetsToIgnored){
+                    packetsTransmitted++;
+                }
             }
             catch(UnknownHostException e){
                 Log.e(TAG, "Fail to find host");
