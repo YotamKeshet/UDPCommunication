@@ -37,9 +37,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="IP: "
-        android:textSize="15sp"
+        android:textSize="14sp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -56,14 +56,15 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:inputType="textPersonName"
-        android:text="" />
+        android:text=""
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/portTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Port: "
-        android:textSize="15sp"
+        android:textSize="14sp"
         android:layout_below="@+id/ipTextView"
         android:layout_marginTop="18dp"
         android:layout_marginStart="20dp"
@@ -84,7 +85,8 @@
         android:layout_below="@+id/ipEditText"
         android:digits="0,1,2,3,4,5,6,7,8,9"
         android:focusable="true"
-        android:focusableInTouchMode="true"/>
+        android:focusableInTouchMode="true"
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/packetSizeTextView"
@@ -92,7 +94,7 @@
         android:layout_height="wrap_content"
         android:text="@string/packet_size_bytes"
         android:layout_below="@+id/portTextView"
-        android:textSize="15sp"
+        android:textSize="14sp"
         android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
@@ -112,7 +114,8 @@
         android:layout_toEndOf="@+id/packetSizeTextView"
         android:digits="0,1,2,3,4,5,6,7,8,9"
         android:focusable="true"
-        android:focusableInTouchMode="true"/>
+        android:focusableInTouchMode="true"
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/delayTextView"
@@ -120,7 +123,7 @@
         android:layout_height="wrap_content"
         android:text="@string/delay_ms"
         android:layout_below="@+id/packetSizeTextView"
-        android:textSize="15sp"
+        android:textSize="14sp"
         android:layout_marginTop="25dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
@@ -140,7 +143,8 @@
         android:layout_toEndOf="@+id/delayTextView"
         android:digits="0,1,2,3,4,5,6,7,8,9"
         android:focusable="true"
-        android:focusableInTouchMode="true"/>
+        android:focusableInTouchMode="true"
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/TestDurationTextView"
@@ -148,7 +152,7 @@
         android:layout_height="wrap_content"
         android:text="@string/test_duration"
         android:layout_below="@+id/delayTextView"
-        android:textSize="15sp"
+        android:textSize="14sp"
         android:layout_marginTop="25dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
@@ -158,7 +162,7 @@
 
 
     <EditText
-        android:id="@+id/TestDurationEditText"
+        android:id="@+id/testDurationEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="4"
@@ -168,7 +172,8 @@
         android:layout_toEndOf="@+id/TestDurationTextView"
         android:digits="0,1,2,3,4,5,6,7,8,9"
         android:focusable="true"
-        android:focusableInTouchMode="true"/>
+        android:focusableInTouchMode="true"
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/JitterBufferTextView"
@@ -176,8 +181,8 @@
         android:layout_height="wrap_content"
         android:text="@string/jitter_buffer_ms"
         android:layout_below="@+id/TestDurationTextView"
-        android:textSize="15sp"
-        android:layout_marginTop="25dp"
+        android:textSize="14sp"
+        android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
         android:focusable="true"
         android:focusableInTouchMode="true">
@@ -186,17 +191,47 @@
 
 
     <EditText
-        android:id="@+id/JitterBufferEditText"
+        android:id="@+id/jitterBufferEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="4"
         android:inputType="textPersonName"
         android:text=""
-        android:layout_below="@+id/TestDurationEditText"
+        android:layout_below="@+id/testDurationEditText"
         android:layout_toEndOf="@+id/JitterBufferTextView"
         android:digits="0,1,2,3,4,5,6,7,8,9"
         android:focusable="true"
-        android:focusableInTouchMode="true"/>
+        android:focusableInTouchMode="true"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/ignoredPacketsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ignored_packets"
+        android:layout_below="@+id/JitterBufferTextView"
+        android:textSize="14sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+    </TextView>
+
+
+    <EditText
+        android:id="@+id/ignoredPacketsEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="4"
+        android:inputType="textPersonName"
+        android:text="@string/_0"
+        android:layout_below="@+id/jitterBufferEditText"
+        android:layout_toEndOf="@+id/JitterBufferTextView"
+        android:digits="0,1,2,3,4,5,6,7,8,9"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/measurement"
@@ -206,7 +241,7 @@
         android:textStyle="bold"
         android:textSize="18sp"
         android:layout_marginStart="20dp"
-        android:layout_below="@+id/JitterBufferEditText"
+        android:layout_below="@+id/ignoredPacketsEditText"
         android:layout_marginTop="12dp"
         android:focusable="true"
         android:focusableInTouchMode="true"/>

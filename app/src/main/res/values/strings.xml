@@ -20,4 +20,6 @@
     <string name="icmp">ICMP</string>
     <string name="count">Count:</string>
     <string name="wait">Wait:</string>
+    <string name="ignored_packets">Ignored Packets:</string>
+    <string name="_0">0</string>
 </resources>

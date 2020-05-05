@@ -33,6 +33,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private EditText mDelayEditText;
     private EditText mTestDurationEditText;
     private EditText mJitterBufferEditText;
+    private EditText mIgnoredPacketsEditText;
     private TextView mAverageDelayTextView;
     private TextView mMaxDelayTextView;
     private TextView mMinDelayTextView;
@@ -49,6 +50,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private int mPacketSize;
     private int mDelay;
     private int mJitterBuffer;
+    private int mNumberOfPacketsToIgnored;
 
     private long mElapsedTime = 0;
     private long mTestDuration = 0;
@@ -56,7 +58,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
     private ServiceConnection mServiceConnection;
     private ClientService mClientService;
 
-    private boolean updateUi = false;
+    private boolean mUpdateUi = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +94,9 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mPacketsTransmittedTextView = findViewById(R.id.packetsTransmitted);
         mPacketsReceivedTextView = findViewById(R.id.packetsReceived);
         mElapsedTimeTextView = findViewById(R.id.elapsedTime);
-        mTestDurationEditText = findViewById(R.id.TestDurationEditText);
-        mJitterBufferEditText = findViewById(R.id.JitterBufferEditText);
+        mTestDurationEditText = findViewById(R.id.testDurationEditText);
+        mJitterBufferEditText = findViewById(R.id.jitterBufferEditText);
+        mIgnoredPacketsEditText = findViewById(R.id.ignoredPacketsEditText);
     }
 
     private ServiceConnection setServiceConnection(){
@@ -170,7 +173,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
             @Override
             public void run() {
-                if(updateUi){
+                if(mUpdateUi){
                    UpdateObject updateObject = mClientService.getDataToUpdateUI();
 
                     long averageDelay = 0;
@@ -227,8 +230,9 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mDelay = Integer.valueOf(mDelayEditText.getText().toString());
         mTestDuration = Integer.valueOf(mTestDurationEditText.getText().toString());
         mJitterBuffer = Integer.valueOf(mJitterBufferEditText.getText().toString());
+        mNumberOfPacketsToIgnored = Integer.valueOf(mIgnoredPacketsEditText.getText().toString());
 
-        Log.d(TAG, "mServerIp = " + mServerIp + "  mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize + "  mDelay = " + mDelay);
+        Log.d(TAG, "mServerIp = " + mServerIp + "  mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize + "  mDelay = " + mDelay + " mTestDuration = " + mTestDuration + " mJitterBuffer = " + mJitterBuffer + " mNumberOfPacketsToIgnored = " + mNumberOfPacketsToIgnored);
     }
 
     @Override
@@ -245,10 +249,10 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
             mElapsedTime = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
 
             getEditTextParameters();
-            mClientService.startReceiveMessages(mPacketSize, mDelay, mJitterBuffer);
+            mClientService.startReceiveMessages(mPacketSize, mDelay, mJitterBuffer, mNumberOfPacketsToIgnored);
             mClientService.startSendMessage(mServerIp, mServerPort, mPacketSize, mDelay);
             updateUI();
-            updateUi = true;
+            mUpdateUi = true;
         }
         else if(v.getId() == R.id.stop){
             new Thread() {
@@ -260,7 +264,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
                                 mButtonStart.setEnabled(true);
                                 mButtonStop.setEnabled(false);
                                 mClientService.stopTest();
-                                updateUi = false;
+                                mUpdateUi = false;
                             }
                         });
                 }

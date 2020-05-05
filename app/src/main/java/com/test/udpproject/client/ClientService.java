@@ -174,7 +174,7 @@ public class ClientService extends Service {
         }
     }
 
-    public void startReceiveMessages(final int packetSize, final int delay, final int jitterBuffer){
+    public void startReceiveMessages(final int packetSize, final int delay, final int jitterBuffer, final int packetsToIgnored){
         Log.d(TAG, "startReceiveMessages");
         isStartFlag = true;
 
@@ -186,7 +186,7 @@ public class ClientService extends Service {
 
             @Override
             public void run() {
-                receiveMessage(packetSize, delay, jitterBuffer);
+                receiveMessage(packetSize, delay, jitterBuffer, packetsToIgnored);
             }
         };
 
@@ -228,7 +228,7 @@ public class ClientService extends Service {
         }
     }
 
-    private void receiveMessage(int packetSize, int delay, int jitterBuffer){
+    private void receiveMessage(int packetSize, int delay, int jitterBuffer, int packetsToIgnored){
         Log.d(TAG, "receiveMessage");
         while(true){
             try{
@@ -241,7 +241,7 @@ public class ClientService extends Service {
 
                 Log.d(TAG, "Message has been received.");
 
-                analyzeData(answerFromServer, jitterBuffer);
+                analyzeData(answerFromServer, jitterBuffer, packetsToIgnored);
             }
             catch(UnknownHostException e){
                 Log.e(TAG, "Fail to find host");
@@ -296,7 +296,7 @@ public class ClientService extends Service {
         return message;
     }
 
-    private synchronized void analyzeData(byte[] data, int jitterBuffer){
+    private synchronized void analyzeData(byte[] data, int jitterBuffer, int packetsToIgnored){
         byte[] clientMessageCounterByteArray = new byte[4];
         byte[] clientTimestampByteArray = new byte[8];
 
@@ -312,6 +312,12 @@ public class ClientService extends Service {
         long clientTimestamp = bytesToLong(clientTimestampByteArray);
 
         Log.d(TAG, "clientMessageCounter = " + clientMessageCounter + "  clientTimestamp = " + clientTimestamp);
+
+        if(packetsToIgnored >= clientMessageCounter){
+            packetsReceived --;
+            Log.d(TAG, "ignore packet...");
+            return;
+        }
 
         long delayNano = System.nanoTime() - clientTimestamp;
         long delay = TimeUnit.MILLISECONDS.convert(delayNano, TimeUnit.NANOSECONDS);
