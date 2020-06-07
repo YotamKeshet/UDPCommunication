@@ -23,13 +23,13 @@ public class OnAlarmReceiver extends BroadcastReceiver {
         mAlarmReceiverCallback = alarmReceiverCallback;
     }
 
-    public OnAlarmReceiver(){}
+    public OnAlarmReceiver() {
+    }
 
     @Override
-    public void onReceive(Context context, Intent intent)
-    {
+    public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive");
-        if(Objects.equals(intent.getAction(), "INTENT_ALARM_ACTION")){
+        if (Objects.equals(intent.getAction(), "INTENT_ALARM_ACTION")) {
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             PowerManager.WakeLock wl = null;
             if (pm != null) {
@@ -47,8 +47,7 @@ public class OnAlarmReceiver extends BroadcastReceiver {
         }
     }
 
-    public void setAlarm(Context context, String serverIp, int serverPort, int packetSize, long delay, int packetToIgnored)
-    {
+    public void setAlarm(Context context, String serverIp, int serverPort, int packetSize, long delay, int packetToIgnored) {
         Log.d(TAG, "setAlarm");
 
         mServerIp = serverIp;
@@ -56,7 +55,7 @@ public class OnAlarmReceiver extends BroadcastReceiver {
         mPacketSize = packetSize;
         mPacketToIgnored = packetToIgnored;
 
-        AlarmManager am =( AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, OnAlarmReceiver.class);
         i.setAction("INTENT_ALARM_ACTION");
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
@@ -65,8 +64,7 @@ public class OnAlarmReceiver extends BroadcastReceiver {
         }
     }
 
-    public void cancelAlarm(Context context)
-    {
+    public void cancelAlarm(Context context) {
         Log.d(TAG, "cancelAlarm");
         Intent intent = new Intent(context, OnAlarmReceiver.class);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);

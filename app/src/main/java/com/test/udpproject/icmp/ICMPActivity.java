@@ -47,7 +47,7 @@ public class ICMPActivity extends Activity implements View.OnClickListener {
         setListeners();
     }
 
-    private void initializeViews(){
+    private void initializeViews() {
         mCountEditText = findViewById(R.id.countEditText);
         mWaitEditText = findViewById(R.id.waitEditText);
         mButtonStart = findViewById(R.id.start);
@@ -61,7 +61,7 @@ public class ICMPActivity extends Activity implements View.OnClickListener {
         mElapsedTimeTextView = findViewById(R.id.elapsedTime);
     }
 
-    private void setListeners(){
+    private void setListeners() {
         mButtonStart.setOnClickListener(this);
         mButtonStop.setOnClickListener(this);
     }
@@ -99,8 +99,7 @@ public class ICMPActivity extends Activity implements View.OnClickListener {
             }, mCount, mWait);
 
             mTask.execute("8.8.8.8");
-        }
-        else if(view.getId() == R.id.stop){
+        } else if (view.getId() == R.id.stop) {
             Log.d(TAG, "stop");
             mButtonStart.setEnabled(true);
             mButtonStop.setEnabled(false);
@@ -110,7 +109,7 @@ public class ICMPActivity extends Activity implements View.OnClickListener {
     }
 
 
-    private void getEditTextParameters(){
+    private void getEditTextParameters() {
         mCount = Integer.valueOf(mCountEditText.getText().toString());
         mWait = Integer.valueOf(mWaitEditText.getText().toString());
 
@@ -128,7 +127,7 @@ public class ICMPActivity extends Activity implements View.OnClickListener {
         return super.dispatchTouchEvent(ev);
     }
 
-    private void updateUI(final int packetTransmitted, final int packetReceived, final long minDelay, final long maxDelay, final long sumDelay){
+    private void updateUI(final int packetTransmitted, final int packetReceived, final long minDelay, final long maxDelay, final long sumDelay) {
         new Thread() {
             public void run() {
                 runOnUiThread(new Runnable() {
@@ -136,13 +135,13 @@ public class ICMPActivity extends Activity implements View.OnClickListener {
                     @Override
                     public void run() {
                         long averageDelay = 0;
-                        if(packetReceived != 0){
+                        if (packetReceived != 0) {
                             averageDelay = sumDelay / packetReceived;
                         }
 
                         double lossRatio = 0;
-                        if(packetTransmitted != 0){
-                            lossRatio = ((double)(packetTransmitted - packetReceived) / (double)packetTransmitted) * 100;
+                        if (packetTransmitted != 0) {
+                            lossRatio = ((double) (packetTransmitted - packetReceived) / (double) packetTransmitted) * 100;
                         }
 
                         StringBuilder averageDelayStringBuilder = new StringBuilder();
@@ -174,7 +173,7 @@ public class ICMPActivity extends Activity implements View.OnClickListener {
                         mPacketsReceivedTextView.setText(packetsReceivedStringBuilder);
                         mElapsedTimeTextView.setText(elapsedTimeStringBuilder);
 
-                        if(packetTransmitted == mCount){
+                        if (packetTransmitted == mCount) {
                             mButtonStop.callOnClick();
                         }
                     }

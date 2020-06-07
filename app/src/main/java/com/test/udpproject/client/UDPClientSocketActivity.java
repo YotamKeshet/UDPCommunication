@@ -1,11 +1,11 @@
 package com.test.udpproject.client;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,6 +19,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.test.udpproject.R;
 
 import java.util.Date;
@@ -27,6 +31,9 @@ import java.util.concurrent.TimeUnit;
 public class UDPClientSocketActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "UDPClientSocketActivity";
+    private static final int PERMISSION_ALL = 1;
+    private static final String[] PERMISSIONS = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
     private EditText mIPEditText;
     private EditText mPortEditText;
     private EditText mPacketSizeEditText;
@@ -60,18 +67,28 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
     private boolean mUpdateUi = false;
 
+    private static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_udpclient_socket);
 
-        initializeViews();
-        setListeners();
-        mServiceConnection = setServiceConnection();
-
-        Intent intent = new Intent(this, ClientService.class);
-        bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+        if (hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            initialize();
+        } else {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
     }
 
     @Override
@@ -80,7 +97,25 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         unbindService(mServiceConnection);
     }
 
-    private void initializeViews(){
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (hasPermissions(this, PERMISSIONS)) {
+            initialize();
+        } else {
+            finish();
+        }
+    }
+
+    private void initialize() {
+        initializeViews();
+        setListeners();
+        mServiceConnection = setServiceConnection();
+
+        Intent intent = new Intent(this, ClientService.class);
+        bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+    }
+
+    private void initializeViews() {
         mButtonStart = findViewById(R.id.start);
         mButtonStop = findViewById(R.id.stop);
         mPortEditText = findViewById(R.id.portEditText);
@@ -99,7 +134,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mIgnoredPacketsEditText = findViewById(R.id.ignoredPacketsEditText);
     }
 
-    private ServiceConnection setServiceConnection(){
+    private ServiceConnection setServiceConnection() {
         return new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -114,7 +149,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         };
     }
 
-    private void setListeners(){
+    private void setListeners() {
         mButtonStart.setOnClickListener(this);
         mButtonStop.setOnClickListener(this);
         setIpFilter();
@@ -131,23 +166,19 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         return super.dispatchTouchEvent(ev);
     }
 
-    private void setIpFilter(){
+    private void setIpFilter() {
         InputFilter[] filters = new InputFilter[1];
         filters[0] = new InputFilter() {
             @Override
-            public CharSequence filter(CharSequence source, int start,
-                                       int end, Spanned dest, int dstart, int dend) {
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
                 if (end > start) {
                     String destTxt = dest.toString();
-                    String resultingTxt = destTxt.substring(0, dstart) +
-                            source.subSequence(start, end) +
-                            destTxt.substring(dend);
-                    if (!resultingTxt.matches ("^\\d{1,3}(\\." +
-                            "(\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3})?)?)?)?)?)?")) {
+                    String resultingTxt = destTxt.substring(0, dstart) + source.subSequence(start, end) + destTxt.substring(dend);
+                    if (!resultingTxt.matches("^\\d{1,3}(\\." + "(\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3})?)?)?)?)?)?")) {
                         return "";
                     } else {
                         String[] splits = resultingTxt.split("\\.");
-                        for (int i=0; i<splits.length; i++) {
+                        for (int i = 0; i < splits.length; i++) {
                             if (Integer.valueOf(splits[i]) > 255) {
                                 return "";
                             }
@@ -161,9 +192,9 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         mIPEditText.setFilters(filters);
     }
 
-    public synchronized void updateUI(){
+    public synchronized void updateUI() {
 
-        if(mTestDuration < (TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()) - mElapsedTime)){
+        if (mTestDuration < (TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()) - mElapsedTime)) {
             mButtonStop.callOnClick();
             return;
         }
@@ -173,17 +204,17 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
             @Override
             public void run() {
-                if(mUpdateUi){
-                   UpdateObject updateObject = mClientService.getDataToUpdateUI();
+                if (mUpdateUi) {
+                    UpdateObject updateObject = mClientService.getDataToUpdateUI();
 
                     long averageDelay = 0;
-                    if(updateObject.getPacketsReceived() != 0){
+                    if (updateObject.getPacketsReceived() != 0) {
                         averageDelay = updateObject.getSumOfDelays() / (updateObject.getPacketsReceived());
                     }
 
                     double lossRatio = 0;
-                    if(updateObject.getPacketsTransmitted() != 0){
-                        lossRatio = ((double)(updateObject.getPacketsTransmitted() - updateObject.getPacketsReceived()) / (double)updateObject.getPacketsTransmitted()) * 100;
+                    if (updateObject.getPacketsTransmitted() != 0) {
+                        lossRatio = ((double) (updateObject.getPacketsTransmitted() - updateObject.getPacketsReceived()) / (double) updateObject.getPacketsTransmitted()) * 100;
                     }
 
                     StringBuilder averageDelayStringBuilder = new StringBuilder();
@@ -223,7 +254,7 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
         timerHandler.postDelayed(timerRunnable, 1000);
     }
 
-    private void getEditTextParameters(){
+    private void getEditTextParameters() {
         mServerIp = mIPEditText.getText().toString();
         mServerPort = Integer.valueOf(mPortEditText.getText().toString());
         mPacketSize = Integer.valueOf(mPacketSizeEditText.getText().toString());
@@ -249,30 +280,31 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
             mElapsedTime = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
 
             getEditTextParameters();
+            mClientService.startWriteStatisticFile();
             mClientService.startReceiveMessages(mPacketSize, mDelay, mJitterBuffer, mNumberOfPacketsToIgnored);
             mClientService.startSendMessage(mServerIp, mServerPort, mPacketSize, mDelay, mNumberOfPacketsToIgnored);
             updateUI();
             mUpdateUi = true;
-        }
-        else if(v.getId() == R.id.stop){
+        } else if (v.getId() == R.id.stop) {
             new Thread() {
                 public void run() {
-                        runOnUiThread(new Runnable() {
+                    runOnUiThread(new Runnable() {
 
-                            @Override
-                            public void run() {
-                                mButtonStart.setEnabled(true);
-                                mButtonStop.setEnabled(false);
-                                mClientService.stopTest();
-                                mUpdateUi = false;
-                            }
-                        });
+                        @Override
+                        public void run() {
+                            mButtonStart.setEnabled(true);
+                            mButtonStop.setEnabled(false);
+                            mClientService.stopTest();
+                            mUpdateUi = false;
+                            mClientService.stopWriteStatisticFile();
+                        }
+                    });
                 }
             }.start();
         }
     }
 
-    private void clearViews(){
+    private void clearViews() {
         mAverageDelayTextView.setText(getString(R.string.average_delay));
         mMaxDelayTextView.setText(getString(R.string.max_delay));
         mMinDelayTextView.setText(getString(R.string.min_delay));

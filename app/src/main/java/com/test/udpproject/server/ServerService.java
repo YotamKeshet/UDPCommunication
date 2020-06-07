@@ -63,25 +63,17 @@ public class ServerService extends Service {
         return myService;
     }
 
-
-    class LocalBinder extends Binder {
-        ServerService getService() {
-            return ServerService.this;
-        }
-    }
-
     public void startServerSocket(final int packetSize, final int serverPort) {
         Log.d(TAG, "startServerSocket");
 
         isStartFlag = true;
 
 
-
         Thread thread = new Thread(new Runnable() {
 
             @Override
             public void run() {
-                while(isStartFlag){
+                while (isStartFlag) {
                     byte[] msg = new byte[packetSize];
                     DatagramPacket dp = new DatagramPacket(msg, msg.length);
                     try (DatagramSocket ds = new DatagramSocket(serverPort)) {
@@ -107,7 +99,13 @@ public class ServerService extends Service {
         thread.start();
     }
 
-    public void stopServerSocket(){
+    public void stopServerSocket() {
         isStartFlag = false;
+    }
+
+    class LocalBinder extends Binder {
+        ServerService getService() {
+            return ServerService.this;
+        }
     }
 }

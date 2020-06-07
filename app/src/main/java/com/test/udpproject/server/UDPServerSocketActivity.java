@@ -1,7 +1,5 @@
 package com.test.udpproject.server;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +12,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.test.udpproject.R;
 
@@ -52,7 +52,7 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
         unbindService(mServiceConnection);
     }
 
-    private ServiceConnection setServiceConnection(){
+    private ServiceConnection setServiceConnection() {
         return new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -67,14 +67,14 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
         };
     }
 
-    private void initializeViews(){
-        buttonStartReceiving =  findViewById(R.id.btn_start_receiving);
+    private void initializeViews() {
+        buttonStartReceiving = findViewById(R.id.btn_start_receiving);
         buttonStopReceiving = findViewById(R.id.btn_stop_receiving);
         mPortEditText = findViewById(R.id.portEditText);
         mPacketSizeEditText = findViewById(R.id.packetSizeEditText);
     }
 
-    private void setListeners(){
+    private void setListeners() {
         buttonStartReceiving.setOnClickListener(this);
         buttonStopReceiving.setOnClickListener(this);
     }
@@ -111,13 +111,12 @@ public class UDPServerSocketActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private void getEditTextParameters(){
+    private void getEditTextParameters() {
         mServerPort = Integer.valueOf(mPortEditText.getText().toString());
         mPacketSize = Integer.valueOf(mPacketSizeEditText.getText().toString());
 
         Log.d(TAG, "mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize);
     }
-
 
 
 }

@@ -35,7 +35,7 @@ public class PingTask extends AsyncTask<String, Void, Void> {
         resetParameters();
     }
 
-    private void resetParameters(){
+    private void resetParameters() {
         Log.d(TAG, "resetParameters");
         mPacketTransmitted = 0;
         mPacketReceived = 0;
@@ -75,10 +75,7 @@ public class PingTask extends AsyncTask<String, Void, Void> {
         Log.d(TAG, "doInBackground");
 
         try {
-            mProcess = new ProcessBuilder()
-                    .command("/system/bin/ping" , params[0])
-                    .redirectErrorStream(true)
-                    .start();
+            mProcess = new ProcessBuilder().command("/system/bin/ping", params[0]).redirectErrorStream(true).start();
 
             try {
                 InputStream in = mProcess.getInputStream();
@@ -87,9 +84,9 @@ public class PingTask extends AsyncTask<String, Void, Void> {
 
                 int len;
 
-                while(mCount != 0){
+                while (mCount != 0) {
                     len = in.read(buffer);
-                    if(len != -1){
+                    if (len != -1) {
                         Log.d(TAG, "write, len = " + len);
                         mPOut.write(buffer, 0, len);
                         mPacketTransmitted++;
@@ -117,6 +114,7 @@ public class PingTask extends AsyncTask<String, Void, Void> {
         }
         return null;
     }
+
     @Override
     protected void onProgressUpdate(Void... values) {
         try {
@@ -124,7 +122,7 @@ public class PingTask extends AsyncTask<String, Void, Void> {
             while (mReader.ready()) {
                 String answerFromServer = mReader.readLine();
                 Log.d(TAG, answerFromServer);
-                if(answerFromServer.contains("from 8.8.8.8:")){
+                if (answerFromServer.contains("from 8.8.8.8:")) {
                     String[] strings = answerFromServer.split(" ");
 
                     String packetReceivedString = strings[4];
@@ -135,21 +133,20 @@ public class PingTask extends AsyncTask<String, Void, Void> {
                     String stringDelay = strings[6];
                     String[] delayStrings = stringDelay.split("=");
                     double doubleDelay = Double.valueOf(delayStrings[1]);
-                    long delay = (long)doubleDelay;
+                    long delay = (long) doubleDelay;
 
-                    if(delay > mMaxDelay){
+                    if (delay > mMaxDelay) {
                         mMaxDelay = delay;
                     }
 
-                    if(delay < mMinDelay){
+                    if (delay < mMinDelay) {
                         mMinDelay = delay;
                     }
 
                     mSumDelay += delay;
 
                     mPingTaskCallback.update(mPacketTransmitted, mPacketReceived, mMinDelay, mMaxDelay, mSumDelay);
-                }
-                else{
+                } else {
                     Log.e(TAG, "Error Not from server..");
                 }
 
