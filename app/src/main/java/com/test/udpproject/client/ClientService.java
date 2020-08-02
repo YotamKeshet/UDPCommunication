@@ -35,6 +35,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class ClientService extends Service {
 
@@ -257,7 +258,7 @@ public class ClientService extends Service {
         byte[] counterBytes = ByteBuffer.allocate(4).putInt(messageNumber).array();
         Log.d(TAG, "messageNumber = " + messageNumber + "  counterBytes = " + Arrays.toString(counterBytes));
 
-        long timestamp = System.currentTimeMillis();
+        long timestamp = System.nanoTime();
 
         byte[] timestampBytes = ByteBuffer.allocate(28).putLong(timestamp).array();
         Log.d(TAG, "timestamp = " + timestamp + "  timestampBytes = " + Arrays.toString(timestampBytes));
@@ -310,7 +311,8 @@ public class ClientService extends Service {
             return;
         }
 
-        long delay = System.currentTimeMillis() - clientTimestamp;
+        long delayNano = System.nanoTime() - clientTimestamp;
+        long delay = TimeUnit.MICROSECONDS.convert(delayNano, TimeUnit.NANOSECONDS);
         Log.d(TAG, "delay = " + delay);
 
         if (delay < jitterBuffer) {
