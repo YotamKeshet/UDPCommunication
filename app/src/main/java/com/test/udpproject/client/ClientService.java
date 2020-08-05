@@ -33,6 +33,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ public class ClientService extends Service {
     private static final String TAG = "ClientService";
     private static final String TESTS_FOLDER_NAME = "BluetoothTestStatistics";
     int messageNumber = 1;
-    private HandlerThread handlerThreadReceive;
+    private HandlerThread handlerThreadReceive = null;
     private DatagramSocket mDatagramSocket;
     private boolean isStartFlag = false;
     private int packetsTransmitted = 0;
@@ -116,7 +117,10 @@ public class ClientService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        handlerThreadReceive.quitSafely();
+        if (handlerThreadReceive != null) {
+            handlerThreadReceive.quitSafely();
+        }
+
         return super.onUnbind(intent);
     }
 
@@ -312,7 +316,7 @@ public class ClientService extends Service {
         }
 
         long delayNano = System.nanoTime() - clientTimestamp;
-        long delay = TimeUnit.MICROSECONDS.convert(delayNano, TimeUnit.NANOSECONDS);
+        long delay = TimeUnit.NANOSECONDS.toMillis(delayNano);
         Log.d(TAG, "delay = " + delay);
 
         if (delay < jitterBuffer) {
@@ -359,12 +363,23 @@ public class ClientService extends Service {
 
         File baseDirectory = new File(baseDir);
 
-        boolean baseDirectoryMkdirResult;
-        if (!baseDirectory.exists()) {
-            baseDirectoryMkdirResult = baseDirectory.mkdir();
-        } else {
-            baseDirectoryMkdirResult = true;
+        boolean baseDirectoryMkdirResult = false;
+        try {
+            if (!baseDirectory.exists()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Files.createDirectories(baseDirectory.toPath());
+                    baseDirectoryMkdirResult = true;
+                } else {
+                    baseDirectoryMkdirResult = baseDirectory.mkdir();
+                }
+            } else {
+                baseDirectoryMkdirResult = true;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
 
         if (baseDirectoryMkdirResult) {
             String testDir = baseDir + File.separator + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());

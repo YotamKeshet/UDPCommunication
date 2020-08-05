@@ -256,12 +256,12 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
 
     private void getEditTextParameters() {
         mServerIp = mIPEditText.getText().toString();
-        mServerPort = Integer.valueOf(mPortEditText.getText().toString());
-        mPacketSize = Integer.valueOf(mPacketSizeEditText.getText().toString());
-        mDelay = Integer.valueOf(mDelayEditText.getText().toString());
-        mTestDuration = Integer.valueOf(mTestDurationEditText.getText().toString());
-        mJitterBuffer = Integer.valueOf(mJitterBufferEditText.getText().toString());
-        mNumberOfPacketsToIgnored = Integer.valueOf(mIgnoredPacketsEditText.getText().toString());
+        mServerPort = Integer.parseInt(mPortEditText.getText().toString());
+        mPacketSize = Integer.parseInt(mPacketSizeEditText.getText().toString());
+        mDelay = Integer.parseInt(mDelayEditText.getText().toString());
+        mTestDuration = Integer.parseInt(mTestDurationEditText.getText().toString());
+        mJitterBuffer = Integer.parseInt(mJitterBufferEditText.getText().toString());
+        mNumberOfPacketsToIgnored = Integer.parseInt(mIgnoredPacketsEditText.getText().toString());
 
         Log.d(TAG, "mServerIp = " + mServerIp + "  mServerPort = " + mServerPort + "  mPacketSize = " + mPacketSize + "  mDelay = " + mDelay + " mTestDuration = " + mTestDuration + " mJitterBuffer = " + mJitterBuffer + " mNumberOfPacketsToIgnored = " + mNumberOfPacketsToIgnored);
     }
@@ -279,7 +279,15 @@ public class UDPClientSocketActivity extends AppCompatActivity implements View.O
             clearViews();
             mElapsedTime = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
 
-            getEditTextParameters();
+            try {
+                getEditTextParameters();
+            } catch (Exception e) {
+                Log.e(TAG, "Could not start the test because the chosen parameters are not valid");
+                mButtonStart.setEnabled(true);
+                mButtonStop.setEnabled(false);
+                return;
+            }
+
             mClientService.startWriteStatisticFile();
             mClientService.startReceiveMessages(mPacketSize, mDelay, mJitterBuffer, mNumberOfPacketsToIgnored);
             mClientService.startSendMessage(mServerIp, mServerPort, mPacketSize, mDelay, mNumberOfPacketsToIgnored);
